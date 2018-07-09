@@ -1,0 +1,140 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf400
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Sub Button1_Click()\
+Call setUp\
+Call volume\
+End Sub\
+\
+\
+Sub volume()\
+Dim rng As Range\
+rowNum = 0\
+vol = 0\
+rw = 2\
+col = 1\
+tickrw = 2\
+rngStart = 0\
+rngEnd = 0\
+diff = 0\
+percentChange = 0\
+maxVol = 0\
+pmax = 0\
+pmin = 0\
+erw = 800000\
+\
+'Do this while the initial row value is less than the end row value\
+Do While rw < erw\
+\
+'List all of the different ticker values and makes a list in row "I"\
+If Cells(rw, col) <> Cells(rw - 1, col) Then\
+\
+    Range("I" & tickrw).Value = Cells(rw, col)\
+    \
+    'Increment the ticker row value\
+     tickrw = tickrw + 1\
+     \
+     'Re-initialize vol to 0\
+     vol = 0\
+     \
+    'Take the opening value at the time of\
+    'establishing new ticker column\
+     rngStart = Range("C" & rw).Value\
+\
+    End If\
+\
+       'Sum up all of the like-tickered values\
+      If Cells(rw, col) = Cells(rw - 1, col) Then\
+      \
+      'add any same-tickered value to vol\
+      vol = vol + Range("G" & rw).Value\
+      \
+      'Take the closing value on the final like-tickered\
+      'row\
+      rngEnd = Range("F" & rw).Value\
+\
+    End If\
+    \
+'Plug the final looped sum of vol into the respective column\
+Range("L" & tickrw - 1).Value = vol\
+\
+'Find difference between opening and closing values\
+diff = rngEnd - rngStart\
+Range("J" & tickrw - 1).Value = diff\
+Range("J" & tickrw - 1).Value = Round(diff, 3)\
+\
+\
+'Calculate percent change of diff - accounting for rngStart = 0\
+If rngStart = 0 Then\
+percentChange = 0\
+Else\
+percentChange = (diff / rngStart) * 100\
+End If\
+Range("K" & tickrw - 1).Value = percentChange\
+\
+'Round percentage to 3 sig figs\
+Range("K" & tickrw - 1).Value = Round(percentChange, 2)\
+'Range("K" & tickrw - 1).Value = Range("K" & tickrw - 1).Value & "%"\
+\
+'Set cell color to green if difference is positive, red if negative\
+If diff > 0 Then\
+Range("J" & tickrw - 1).Interior.Color = RGB(0, 255, 0)\
+\
+Else\
+Range("J" & tickrw - 1).Interior.Color = RGB(255, 0, 0)\
+End If\
+\
+'Increment row value\
+rw = rw + 1\
+Loop\
+\
+'Place max increase in correct spot\
+pmax = Application.WorksheetFunction.Max(Range("K2:K3000"))\
+Range("P2").Value = pmax & "%"\
+\
+'Place max decrease in correct spot\
+pmin = Application.WorksheetFunction.Min(Range("K2:K3000"))\
+Range("P3").Value = pmin & "%"\
+\
+'Place max volume in correct spot\
+maxVol = Application.WorksheetFunction.Max(Range("L2:L3000"))\
+Range("P4").Value = maxVol\
+\
+'Search the "Percent Changes" column for max\
+'and select corresponding ticker cell\
+Set rng = Range("K2:K3000")\
+rowNum = Application.WorksheetFunction.Match(pmax, rng, 0)\
+Range("O2").Value = Range("I" & rowNum + 1).Value\
+\
+'Search the "Percent Changes" column for min\
+'and select corresponding ticker cell\
+Set rng = Range("K2:K3000")\
+rowNum = Application.WorksheetFunction.Match(pmin, rng, 0)\
+Range("O3").Value = Range("I" & rowNum + 1).Value\
+\
+'Search the "Total Volume" column for max\
+'and select corresponding ticker cell\
+Set rng = Range("L2:L3000")\
+rowNum = Application.WorksheetFunction.Match(maxVol, rng, 0)\
+Range("O4").Value = Range("I" & rowNum + 1).Value\
+\
+End Sub\
+\
+\
+Sub setUp()\
+Range("I1,O1").Value = "Ticker"\
+Range("J1").Value = "Yearly Change"\
+Range("K1").Value = "Percent Change"\
+Range("L1").Value = "Total Volume"\
+Range("N2").Value = "Greatest % Increase"\
+Range("N3").Value = "Greatest % Decrease"\
+Range("N4").Value = "Greatest Total Volume"\
+Range("P1").Value = "Value"\
+End Sub\
+\
+\
+}
